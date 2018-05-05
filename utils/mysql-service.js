@@ -3,9 +3,8 @@ var mysql = require('mysql');
 Promise.promisifyAll(require("mysql/lib/Connection").prototype);
 Promise.promisifyAll(require("mysql/lib/Pool").prototype);
 
-function MySQLService(sails) {
-  // return this;
-}
+// Object constructor
+function MySQLService(sails) {}
 
 var pool = mysql.createPool(sails.config.connections[sails.config.models.connection]);
 
@@ -37,7 +36,7 @@ MySQLService.prototype.columnExists = function columnExists(deprecation, cb) {
 	return this.QUERY(sql, [currentSchema, table, column]).then(function getResults(results) {
 		sails.log.debug(`Verificando a coluna ${column} na tabela ${currentSchema}.${table} - Resultado: ${results.length}`);
 		if(!results.length && removedAt) {
-			// sails.log.warn(`A coluna ${column} na tabela ${currentSchema}.${table} foi depreciada em ${removedAt} e pode ser removida do arquivo deprecations/columns.js`);
+			sails.log.warn(`A coluna ${column} na tabela ${currentSchema}.${table} foi depreciada em ${removedAt} e pode ser removida do arquivo deprecations/columns.js`);
 		}
 		return Promise.resolve(results.length ? true: false);
 	}).catch(function (error) {
@@ -46,7 +45,7 @@ MySQLService.prototype.columnExists = function columnExists(deprecation, cb) {
 }
 
 MySQLService.prototype.registerMigration = function () {
-
+	return Promise.reject(new Error(":: registerMigration :: NOT IMPLEMENTED YET"));
 }
 
 module.exports = MySQLService;
