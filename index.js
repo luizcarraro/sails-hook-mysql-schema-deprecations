@@ -13,13 +13,15 @@ module.exports = function myHook(sails) {
 
    function checkForDeprecatedColumns() {
      var MySQL = new MySQLService(sails);
+
      var deprecationsCheck = deprecatedColumns.map(function (deprecation) {
        return function(next) {
-         MySQL.columnExists(deprecation).then(function (result) {
+         return MySQL.columnExists(deprecation).then(function (result) {
            if(result) {
              deprecation.confirmed = true;
            }
-           return next(null, deprecation);
+           next(null, deprecation);
+           return result;
          })
          .catch(function (err) {
            console.log('catch MySQL.columnExists', err);
@@ -35,10 +37,10 @@ module.exports = function myHook(sails) {
          return;
        }
 
-       printMessage(['DEPRECIAÇÕES :: ' + results.length]);
+       printMessage(['SCHEMA DEPRECATIONS :: :: ' + results.length]);
 
        results.forEach((deprecation) => {
-         printMessage([ 'TABELA: ' + deprecation.table, 'COLUNA: ' + deprecation.column, ':: ' + deprecation.message], {border: false, marginBottom: 1, color: 'yellow'});
+         printMessage([ 'TABLE :: ' + deprecation.table, 'COLUMN :: ' + deprecation.column, 'MESSAGE :: ' + deprecation.message], {border: false, marginBottom: 1, color: 'yellow'});
        });
      });
    }
