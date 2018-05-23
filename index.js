@@ -1,7 +1,8 @@
+var shouldRunHook = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'staging' && !sails.config.disableSchemaDeprecationsHook;
 var path              = require("path");
 var print             = require('print-message');
 var deprecatedColumns = require(path.resolve('deprecations/columns'));
-var MySQLService      = require('./lib/service/mysql-service');
+var MySQLService      = shouldRunHook? require('./lib/service/mysql-service') : {};
 var Utils             = require('./lib/utils');
 const chalk           = require('chalk');
 
@@ -11,8 +12,10 @@ module.exports = function myHook(sails) {
 
    return {
      configure: () => {
-       print(['SCHEMA DEPRECATIONS']);
-       checkForDeprecatedColumns();
+       if(shouldRunHook) {
+         print(['SCHEMA DEPRECATIONS: ' + process.env.NODE_ENV]);
+         checkForDeprecatedColumns();
+       }
      }
    };
 
@@ -34,6 +37,7 @@ module.exports = function myHook(sails) {
      });
 
      async.series(deprecationsCheck, function (error, results) {
+       MySQL.endConnectionsPool();
        if(!results.length) {
          return;
          log.info(chalk.green.bold('No deprecations found for this columns'));
